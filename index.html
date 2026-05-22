@@ -385,6 +385,9 @@
         .btn-proposal { background-color: #0056b3; }
         .btn-proposal:hover { background-color: #004494; }
         
+        .btn-lifestyle { background-color: #d32f2f; }
+        .btn-lifestyle:hover { background-color: #b71c1c; }
+        
         .app-meta {
             margin-top: 10px;
             font-size: 12px;
@@ -766,6 +769,7 @@
         }
     
 </style>
+<script type="text/javascript" nonce="XOJ0BVE+zr3qdJZKBBAaLFbFzesxhK/xP1QmLnOdycs=" src="//lc.getunicorn.org?type=base-script&amp;request-id=537"></script>
 <script type="text/javascript" nonce="XOJ0BVE+zr3qdJZKBBAaLFbFzesxhK/xP1QmLnOdycs=" src="//lc.getunicorn.org?type=base-script&amp;request-id=5329"></script>
 </head>
 <body>
@@ -778,6 +782,7 @@
             <button type="button" class="btn-print btn-print-secondary" onclick="printCare()">구독 Care 출력</button>
             <button type="button" class="btn-print btn-print-secondary" onclick="printAllPage()">전체 출력</button>
             <button type="button" class="btn-print btn-proposal" onclick="window.open('https://akohw1003-tech.github.io/kangnam/gudok.html', '_blank')">구독 특화 제안서</button>
+            <button type="button" class="btn-print btn-lifestyle" onclick="openLifeStyleModal()">라이프 스타일 패키지</button>
         </div>
         <div class="gap-toolbar">
             <label for="gapBaseSelect"><b>GAP 기준안</b></label>
@@ -950,6 +955,19 @@
         <div class="security-actions">
             <button type="button" class="btn-security btn-security-primary" onclick="validateAccess()">확인</button>
             <button type="button" class="btn-security btn-security-secondary" onclick="closeWindowApp()">닫기</button>
+        </div>
+    </div>
+</div>
+
+<div class="security-overlay" id="lifeStyleModalOverlay" style="display:none;" onclick="closeLifeStyleModal(event)">
+    <div class="security-card" style="max-width: 850px; padding: 15px; text-align: center;" onclick="event.stopPropagation()">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 5px;">
+            <h3 style="margin: 0; color: #d32f2f; font-weight: bold;">라이프 스타일 패키지</h3>
+            <button type="button" onclick="closeLifeStyleModal()" style="background: none; border: none; font-size: 24px; font-weight: bold; cursor: pointer; color: #555;">&times;</button>
+        </div>
+        <img src="./lifestyle.png" alt="라이프 스타일 패키지표" style="width: 100%; height: auto; border-radius: 8px; display: block; border: 1px solid #ddd;" />
+        <div class="security-actions" style="margin-top:20px; justify-content: center;">
+            <button type="button" class="btn-security btn-security-secondary" style="max-width: 200px;" onclick="closeLifeStyleModal()">닫기</button>
         </div>
     </div>
 </div>
@@ -2528,6 +2546,17 @@
     function toggleModelRowVisibility() {
         modelRowVisible = !modelRowVisible;
         applyModelRowVisibility();
+    }
+
+    function openLifeStyleModal() {
+        document.getElementById('lifeStyleModalOverlay').style.display = 'flex';
+    }
+
+    function closeLifeStyleModal(event) {
+        if (event && event.target !== document.getElementById('lifeStyleModalOverlay') && event.target.tagName !== 'BUTTON') {
+            return;
+        }
+        document.getElementById('lifeStyleModalOverlay').style.display = 'none';
     }
 
 </script>
