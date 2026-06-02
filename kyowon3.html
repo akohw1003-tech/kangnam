@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>교원72 통합 상담 패널 (FHD/QHD 해상도 최적화)</title>
+<title>교원72 통합 상담 패널 (실적 수동 고정 기능 추가)</title>
 <style>
   :root{
     --bg:#eef3f8; --panel:#ffffff; --line:#d9e3ee; --text:#0f172a; --sub:#64748b;
@@ -21,7 +21,7 @@
       .wrap { zoom: 1.3; } 
   }
 
-  /* 공통 레이아웃 (여백 확대) */
+  /* 공통 레이아웃 */
   .shell{background:#fff;border:1px solid var(--line);border-radius:20px;padding:16px;box-shadow:0 8px 24px rgba(15,23,42,.04); margin-bottom:16px;}
   
   /* 팝업 버튼 스타일 */
@@ -50,7 +50,7 @@
       flex-wrap: wrap; gap: 10px;
   }
   
-  /* 메인 그리드 (좌측 컨트롤 패널 영역 확대 300px -> 360px) */
+  /* 메인 그리드 */
   .mainGrid{display:grid;grid-template-columns:360px 1fr;gap:16px;align-items:start}
   .leftCol,.rightCol{display:flex;flex-direction:column;gap:16px}
   .panel{border:1px solid var(--line);border-radius:16px;background:#fff;overflow:hidden}
@@ -190,7 +190,6 @@
 
 <div class="wrap">
   
-  <!-- ★ 최상단: 최종 결과 패널 ★ -->
   <div class="top-result-panel" id="topResultPanel">
     <div class="hd">
       <div style="display:flex; align-items:center; gap:12px;">
@@ -198,29 +197,47 @@
         <span id="resultBadge" class="badge orange">선택 카드 합산 누적액</span>
       </div>
       <div style="display:flex; align-items:center; gap:12px;">
-        <!-- 구독료 입력 -->
-        <div style="display:flex; align-items:center; background:#fff; border:1px solid #cbd5e1; border-radius:10px; padding:6px 12px; box-shadow:inset 0 1px 3px rgba(0,0,0,0.05);">
-            <span style="font-size:13px; font-weight:900; color:#334155; margin-right:8px;">가전 구독료</span>
-            <input type="text" id="subFeeInput" placeholder="0" style="width:90px; border:none; outline:none; text-align:right; font-size:18px; font-weight:900; color:#1d4ed8; background:transparent;" oninput="updateSubFee(this)" onblur="formatSubFee(this)">
-            <span style="font-size:13px; font-weight:900; color:#475569; margin-left:6px;">원</span>
+        <div style="display:flex; align-items:center; gap:12px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:12px; padding:6px 16px; box-shadow:inset 0 1px 4px rgba(0,0,0,0.04);">
+            <div style="display:flex; align-items:center;">
+                <span style="font-size:13px; font-weight:900; color:#475569; margin-right:8px;">가전 일시불가</span>
+                <input type="text" id="lumpSumInput" placeholder="0" style="width:110px; border:none; outline:none; text-align:right; font-size:16px; font-weight:900; color:#334155; background:transparent;" oninput="updateLumpSum(this)" onblur="formatLumpSum(this)">
+                <span style="font-size:13px; font-weight:900; color:#475569; margin-left:4px;">원</span>
+            </div>
+            <div style="width:1px; height:24px; background:#cbd5e1;"></div>
+            <div style="display:flex; align-items:center;">
+                <span style="font-size:13px; font-weight:900; color:#475569; margin-right:8px;">선납금액</span>
+                <input type="text" id="prepayInput" placeholder="0" style="width:100px; border:none; outline:none; text-align:right; font-size:16px; font-weight:900; color:#0f766e; background:transparent;" oninput="updatePrepay(this)" onblur="formatPrepay(this)">
+                <span style="font-size:13px; font-weight:900; color:#475569; margin-left:4px;">원</span>
+            </div>
+            <div style="width:1px; height:24px; background:#cbd5e1;"></div>
+            <div style="display:flex; align-items:center;">
+                <span style="font-size:13px; font-weight:900; color:#1d4ed8; margin-right:8px;">월 구독료</span>
+                <input type="text" id="subFeeInput" placeholder="0" style="width:90px; border:none; outline:none; text-align:right; font-size:18px; font-weight:900; color:#1d4ed8; background:transparent;" oninput="updateSubFee(this)" onblur="formatSubFee(this)">
+                <span style="font-size:13px; font-weight:900; color:#475569; margin-left:4px;">원</span>
+            </div>
         </div>
+
         <button class="resetBtn" type="button" onclick="resetEntireConsultation()">🔄 상담 초기화</button>
         <button class="popupBtn" type="button" onclick="openKyowonPopup()">🎁 교원 라이프케어 안내</button>
       </div>
     </div>
+    
     <div class="bd" style="padding: 12px 20px;">
       <div id="yearGrid" class="yearGrid"></div>
+      
+      <div id="compareBar"></div>
     </div>
   </div>
 
-  <!-- [상단] 1단계: 소비형 할인 설계 -->
   <div class="shell" id="step1-container">
     <div class="mainGrid">
       
-      <!-- [1단계 좌측] 입력부 -->
       <div class="leftCol">
         <div class="panel">
-          <div class="hd-inner"><h2>1단계: 카드 사용금액 입력</h2><span class="badge orange">KB국민만 관리비 인정</span></div>
+          <div class="hd-inner">
+              <h2>1단계: 카드 사용금액 입력</h2>
+              <span class="badge orange">KB국민만 관리비 인정</span>
+          </div>
           <div class="bd" style="display:flex;flex-direction:column;">
             <div id="expenseGrid1" class="expenseGrid"></div>
             <div class="btns" style="margin:10px 0">
@@ -238,11 +255,13 @@
         </div>
       </div>
       
-      <!-- [1단계 우측] 주력 카드 분배 리스트 -->
       <div class="rightCol">
         <div class="panel" style="height:100%;">
           <div class="hd-inner">
-            <h2>제휴카드 목록 및 자동 분배 결과 (주력 5종)</h2>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <h2>제휴카드 목록 및 자동 분배 결과 (주력 5종)</h2>
+                <span style="font-size:11px; color:#64748b; letter-spacing:-0.5px;">※ 카드 선택 후 실적을 수동 고정할 수 있습니다.</span>
+            </div>
             <span class="badge blue">복수 중복 선택 가능</span>
           </div>
           <div class="bd" style="height:calc(100% - 40px); display:flex; flex-direction:column; justify-content:center;">
@@ -253,18 +272,15 @@
 
     </div>
     
-    <!-- 2단계 전개 버튼 -->
     <button id="revealStep2Btn" class="revealBtn" style="display:none;" onclick="revealStep2()">
       🎁 저축하면서 추가 할인이 가능합니다! [2단계 교원 결합] 설계하기 ⬇️
     </button>
   </div>
 
 
-  <!-- [하단] 2단계: 저축형 할인 (예산 필터링 맞춤형) -->
   <div class="shell step2-panel" id="view-step2" style="margin-bottom: 0;">
     <div class="mainGrid">
       
-      <!-- [2단계 좌측] 컨트롤 패널 -->
       <div class="leftCol">
         <div class="panel">
           <div class="hd-inner"><h2>2단계: 고객 맞춤 교원 상품 설계</h2><span class="badge green">교원 필수</span></div>
@@ -296,7 +312,6 @@
         </div>
       </div>
 
-      <!-- [2단계 우측] 메인 추천 상품 리스트 뷰 -->
       <div class="rightCol">
         <div class="panel" style="height:100%; border:2px solid #bfdbfe; box-shadow:0 4px 12px rgba(37,99,235,0.05);">
           <div class="hd-inner" style="background:linear-gradient(90deg, #f8fbff, #ffffff);">
@@ -312,10 +327,7 @@
     </div>
   </div>
 
-</div> <!-- End of wrap -->
-
-<!-- ★ 팝업 모달 (Iframe 연동) ★ -->
-<div id="kyowonPopup" class="modalOverlay" onclick="if(event.target===this) closeKyowonPopup()">
+</div> <div id="kyowonPopup" class="modalOverlay" onclick="if(event.target===this) closeKyowonPopup()">
   <div class="modalBox" role="dialog" aria-modal="true" aria-labelledby="kyowonPopupTitle">
     <div class="modalHd">
       <div>
@@ -327,7 +339,6 @@
     <div class="modalBody">
       <div class="modalInfoGrid">
         
-        <!-- 좌측 핵심 소구 포인트 -->
         <div class="modalTextPanel">
           <h4 style="color:#1e3a8a; font-weight:900;">고객 안내 스크립트 핵심</h4>
           <div class="modalMiniCards">
@@ -350,15 +361,12 @@
           </div>
         </div>
         
-        <!-- 우측 공식 홈페이지 연동 (Iframe) -->
         <div class="modalImageWrap">
           <div class="modalTab">
               <button class="tabBtn active" onclick="switchIframe(0)">🛒 구독교원 상품 상세안내</button>
               <button class="tabBtn" onclick="switchIframe(1)">🏖️ 전환 가능 라이프케어 서비스</button>
           </div>
-          <!-- iframe 영역 -->
           <iframe id="kyowonIframe" src="https://www.kyowonlife.co.kr/Service/ProductView?categoryCd=01&basiSeq=58" style="width:100%; flex:1; border:none; background:#f8fafc;"></iframe>
-          <!-- 새창 열기 버튼 영역 -->
           <div style="padding:14px 20px; background:#fff; border-top:1px solid #cbd5e1; display:flex; justify-content:flex-end; align-items:center;">
               <span style="font-size:13px; color:#64748b; margin-right:16px;">화면이 작다면 새 창으로 띄워보세요.</span>
               <a id="kyowonLink" href="https://www.kyowonlife.co.kr/Service/ProductView?categoryCd=01&basiSeq=58" target="_blank" class="actionBtn" style="background:#1e3a8a; color:#fff; text-decoration:none; border:none; padding:10px 16px; font-size:13px;">🌐 공식 홈페이지 새 창 열기 ↗</a>
@@ -376,18 +384,27 @@ const raw = v => Number(String(v||"").replace(/[^0-9]/g,"")||0);
 function fmtInput(v){ return v ? Number(v).toLocaleString("ko-KR") : ""; }
 
 let isStep2Revealed = false; 
-let subFee = 0; 
 
-function updateSubFee(el) {
-    subFee = raw(el.value);
-    el.value = fmtInput(subFee);
-    renderUnifiedResult(); 
-}
+// 금액 변수 추가
+let lumpSumFee = 0; // 일시불 금액
+let prepayFee = 0;  // 선납 금액
+let subFee = 0;     // 월 구독료
+
+function updateLumpSum(el) { lumpSumFee = raw(el.value); el.value = fmtInput(lumpSumFee); renderUnifiedResult(); }
+function formatLumpSum(el) { el.value = fmtInput(lumpSumFee); }
+
+function updatePrepay(el) { prepayFee = raw(el.value); el.value = fmtInput(prepayFee); renderUnifiedResult(); }
+function formatPrepay(el) { el.value = fmtInput(prepayFee); }
+
+function updateSubFee(el) { subFee = raw(el.value); el.value = fmtInput(subFee); renderUnifiedResult(); }
 function formatSubFee(el) { el.value = fmtInput(subFee); }
 
+
+// 전체 초기화 함수
 function resetEntireConsultation() {
     data1.expenseLabels.forEach(l => st1.expenses[l] = 0);
     st1.selectedCardIds = [];
+    st1.fixedTiers = {}; // 고정 실적 초기화
     
     isStep2Revealed = false;
     document.getElementById('view-step2').style.display = 'none';
@@ -395,8 +412,16 @@ function resetEntireConsultation() {
     state2.comboId = allCombos.filter(c => c.tab === 4)[0].id;
     state2.cardDiscount = 0;
     
+    lumpSumFee = 0;
+    prepayFee = 0;
     subFee = 0;
+    
+    const lumpInput = document.getElementById('lumpSumInput');
+    const prepayInput = document.getElementById('prepayInput');
     const feeInput = document.getElementById('subFeeInput');
+    
+    if(lumpInput) lumpInput.value = '';
+    if(prepayInput) prepayInput.value = '';
     if(feeInput) feeInput.value = '';
     
     document.getElementById('resultTitle').textContent = "1단계 합산 소비형 할인 결과";
@@ -425,7 +450,7 @@ function revealStep2() {
 }
 
 /* =========================================
-   1단계 (소비형 할인) 로직
+   1단계 (소비형 할인) 로직 - 수동 배정 추가
 ========================================= */
 const data1 = {
   expenseLabels:["관리비","교육비","통신비","생활비","기타"],
@@ -438,7 +463,9 @@ const data1 = {
   ]
 };
 
-const st1 = {expenses:{}, selectedCardIds:[]};
+// fixedTiers 객체 추가: { 'card_id': 300000 } 형태
+const st1 = {expenses:{}, selectedCardIds:[], fixedTiers:{}};
+
 const getTotalSpendUI = ()=>Object.values(st1.expenses).reduce((a,b)=>a+(Number(b)||0),0);
 const getCardSpendLimit = (cardId) => {
     let total = 0;
@@ -457,36 +484,75 @@ function tierFor1(card, amount){
 
 function getBestCombinationForSelected(selectedIds) {
     if (selectedIds.length === 0) return null;
-    let bestCombo = null;
-    let maxDiscount = -1;
-    const cards = selectedIds.map(id => data1.cards.find(c => c.id === id));
-    const totalSpendLimit = getTotalSpendUI();
-    const normalSpendLimit = getCardSpendLimit('shinhan'); 
 
-    function backtrack(index, currentCombo, currentTotalMin, currentNormalMin) {
-        if (index === cards.length) {
-            if (currentTotalMin <= totalSpendLimit && currentNormalMin <= normalSpendLimit) {
-                const totalDisc = currentCombo.reduce((sum, t) => sum + t.discount, 0);
-                if (totalDisc > maxDiscount) {
-                    maxDiscount = totalDisc;
-                    bestCombo = [...currentCombo];
-                }
+    const cards = selectedIds.map(id => data1.cards.find(c => c.id === id));
+    let totalSpendLimit = getTotalSpendUI();
+    let normalSpendLimit = getCardSpendLimit('shinhan'); 
+
+    let fixedCombo = [];
+    let unfixedCards = [];
+
+    // 1. 수동으로 고정된 카드들 먼저 처리
+    for (const card of cards) {
+        if (st1.fixedTiers[card.id]) {
+            const fixedAmt = st1.fixedTiers[card.id];
+            const tier = card.tiers.find(t => t.min === fixedAmt);
+            if (tier) {
+                fixedCombo.push({ cardId: card.id, min: tier.min, discount: tier.discount });
+                totalSpendLimit -= tier.min;
+                if (!card.isKB) normalSpendLimit -= tier.min;
+            } else {
+                unfixedCards.push(card);
+            }
+        } else {
+            unfixedCards.push(card);
+        }
+    }
+
+    // 이미 수동 고정만으로 한도를 초과하면 에러(null) 반환
+    if (totalSpendLimit < 0 || normalSpendLimit < 0) {
+        return null;
+    }
+
+    // 2. 고정되지 않은 나머지 카드들을 남은 한도 내에서 최적 분배 (백트래킹)
+    let bestUnfixedCombo = [];
+    let maxDiscount = -1;
+
+    function backtrack(index, currentCombo, currentTotal, currentNormal) {
+        if (index === unfixedCards.length) {
+            const totalDisc = currentCombo.reduce((sum, t) => sum + t.discount, 0);
+            if (totalDisc > maxDiscount) {
+                maxDiscount = totalDisc;
+                bestUnfixedCombo = [...currentCombo];
             }
             return;
         }
-        const card = cards[index];
+        const card = unfixedCards[index];
         for (const tier of card.tiers) {
-            const newTotalMin = currentTotalMin + tier.min;
-            const newNormalMin = currentNormalMin + (card.isKB ? 0 : tier.min);
-            if (newTotalMin <= totalSpendLimit && newNormalMin <= normalSpendLimit) {
+            const newTotal = currentTotal + tier.min;
+            const newNormal = currentNormal + (card.isKB ? 0 : tier.min);
+
+            if (newTotal <= totalSpendLimit && newNormal <= normalSpendLimit) {
                 currentCombo.push({ cardId: card.id, min: tier.min, discount: tier.discount });
-                backtrack(index + 1, currentCombo, newTotalMin, newNormalMin);
+                backtrack(index + 1, currentCombo, newTotal, newNormal);
                 currentCombo.pop();
             }
         }
     }
-    backtrack(0, [], 0, 0);
-    return { combo: bestCombo, totalDiscount: maxDiscount };
+
+    if (unfixedCards.length > 0) {
+        backtrack(0, [], 0, 0);
+        if (maxDiscount === -1) return null; // 남은 카드를 모두 분배할 한도가 부족할 경우
+        return { 
+            combo: [...fixedCombo, ...bestUnfixedCombo], 
+            totalDiscount: fixedCombo.reduce((sum,t)=>sum+t.discount,0) + maxDiscount 
+        };
+    } else {
+        return { 
+            combo: fixedCombo, 
+            totalDiscount: fixedCombo.reduce((sum,t)=>sum+t.discount,0) 
+        };
+    }
 }
 
 function recommendedCards1(){
@@ -510,6 +576,16 @@ function expenseTyping1(el){ const num=raw(el.value); st1.expenses[el.dataset.la
 function expenseBlur1(el){ const num=raw(el.value); st1.expenses[el.dataset.label]=num; el.value=fmtInput(num); renderAll(); }
 function expenseKeydown1(e,el){ if(e.key==='Enter'){ e.preventDefault(); const num=raw(el.value); st1.expenses[el.dataset.label]=num; el.value=fmtInput(num); renderAll(); } }
 
+// ★ 실적 수동 고정 설정 함수
+function setFixedTier1(cardId, value) {
+    if (value === 'auto') {
+        delete st1.fixedTiers[cardId];
+    } else {
+        st1.fixedTiers[cardId] = Number(value);
+    }
+    renderAll();
+}
+
 function renderCards1(){
   const grid=document.getElementById("cardGrid1"); 
   const recs=recommendedCards1();
@@ -517,7 +593,9 @@ function renderCards1(){
   const combo = comboData ? comboData.combo : null;
   
   let html = "";
-  if (st1.selectedCardIds.length > 0 && !combo) { html += `<div class="errorBox">⚠️ 선택하신 카드들의 최소 실적 합계가 총 한도를 초과합니다.</div>`; }
+  if (st1.selectedCardIds.length > 0 && !combo) { 
+      html += `<div class="errorBox">⚠️ 입력하신 생활비 총 한도가 부족하여 지정하신 카드 조합/실적을 배정할 수 없습니다. 금액을 높이거나 카드를 줄여주세요.</div>`; 
+  }
   
   html += data1.cards.map(card=>{
     const isSelected = st1.selectedCardIds.includes(card.id);
@@ -526,8 +604,45 @@ function renderCards1(){
     const isExcludingMaint = (card.id !== 'kb' && (Number(st1.expenses["관리비"]) || 0) > 0);
     
     let reconMsg = `인정 한도: ${w(cardMaxAmount)} ${isExcludingMaint ? '<span class="warn">(관리비 제외)</span>' : ''}`;
-    if (isSelected && comboItem) { reconMsg = `<span class="alloc">✓ ${w(comboItem.min)} 배정 (혜택: ${w(comboItem.discount)})</span>`; } 
-    else if (isSelected && !combo) { reconMsg = `<span class="error">⚠️ 실적 부족</span>`; }
+    let selectHtml = "";
+
+    if (isSelected && comboItem) { 
+        const isFixed = st1.fixedTiers[card.id] === comboItem.min;
+        reconMsg = `<span class="alloc" style="background:${isFixed ? '#fef08a' : '#fee2e2'}; color:${isFixed ? '#854d0e' : '#dc2626'}; border:1px solid ${isFixed ? '#fde047' : 'transparent'};">
+                    ${isFixed ? '🎯' : '✓'} ${w(comboItem.min)} 배정 (혜택: ${w(comboItem.discount)})
+                   </span>`; 
+
+        // 수동 실적 선택 드롭다운 생성
+        let options = `<option value="auto">✨ 실적 자동 최적화 배정</option>`;
+        card.tiers.forEach(t => {
+            const sel = st1.fixedTiers[card.id] === t.min ? "selected" : "";
+            options += `<option value="${t.min}" ${sel}>🎯 ${w(t.min)} 수동 강제 고정</option>`;
+        });
+        
+        selectHtml = `
+        <div style="margin-top:8px;">
+            <select onchange="setFixedTier1('${card.id}', this.value)" style="width:100%; padding:6px; font-size:12px; font-weight:900; border:1px solid ${isFixed?'#fde047':'#cbd5e1'}; border-radius:6px; background:${isFixed?'#fef08a':'#f8fafc'}; color:${isFixed?'#854d0e':'#334155'}; outline:none; cursor:pointer;">
+                ${options}
+            </select>
+        </div>`;
+
+    } 
+    else if (isSelected && !combo) { 
+        reconMsg = `<span class="error">⚠️ 실적 부족 (조합 실패)</span>`; 
+        
+        // 실패 시에도 고정을 풀 수 있도록 드롭다운 제공
+        let options = `<option value="auto">✨ 실적 자동 최적화 배정</option>`;
+        card.tiers.forEach(t => {
+            const sel = st1.fixedTiers[card.id] === t.min ? "selected" : "";
+            options += `<option value="${t.min}" ${sel}>🎯 ${w(t.min)} 수동 강제 고정</option>`;
+        });
+        selectHtml = `
+        <div style="margin-top:8px;">
+            <select onchange="setFixedTier1('${card.id}', this.value)" style="width:100%; padding:6px; font-size:12px; font-weight:900; border:1px solid #fca5a5; border-radius:6px; background:#fef2f2; color:#dc2626; outline:none; cursor:pointer;">
+                ${options}
+            </select>
+        </div>`;
+    }
 
     return `<div class="card ${recs.includes(card.id) && !isSelected ?"recommended":""} ${isSelected && comboItem ? "selected" : ""}">
       <div class="cardTop"><span class="pill green">${card.months===72?"6년":"5년"}</span>${recs.includes(card.id)?'<span class="pill blue">추천</span>':''}</div>
@@ -539,6 +654,7 @@ function renderCards1(){
           else { isHit = cardMaxAmount >= t.min; }
           return `<div class="tier"><div class="${isHit?"hit":""}">${Number(t.min).toLocaleString("ko-KR")}원↑</div><div class="disc ${isHit?"hit":""}">${Number(t.discount).toLocaleString("ko-KR")}원/월</div></div>`
       }).join("")}</div>
+      ${selectHtml}
       <button class="selBtn ${isSelected ? 'selected-btn' : ''}" onclick="selectCard1('${card.id}')">${isSelected ? "✓ 선택 해제" : "이 카드 추가 선택"}</button>
     </div>`
   }).join("");
@@ -546,7 +662,10 @@ function renderCards1(){
 }
 
 function selectCard1(id){
-    if (st1.selectedCardIds.includes(id)) { st1.selectedCardIds = st1.selectedCardIds.filter(x => x !== id); } 
+    if (st1.selectedCardIds.includes(id)) { 
+        st1.selectedCardIds = st1.selectedCardIds.filter(x => x !== id); 
+        delete st1.fixedTiers[id]; // 카드 해제 시 고정 설정도 삭제
+    } 
     else { st1.selectedCardIds.push(id); }
     renderAll();
 }
@@ -583,7 +702,7 @@ function getStep1YearlyArr() {
 }
 
 function fillExample1(){st1.expenses={관리비:300000,교육비:400000,통신비:0,생활비:0,기타:0}; renderAll();}
-function resetAll1(){st1.expenses={}; data1.expenseLabels.forEach(l=>st1.expenses[l]=0); st1.selectedCardIds=[]; renderAll();}
+function resetAll1(){st1.expenses={}; data1.expenseLabels.forEach(l=>st1.expenses[l]=0); st1.selectedCardIds=[]; st1.fixedTiers={}; renderAll();}
 
 /* =========================================
    2단계 (저축형 할인) 교원 상품 삭제 및 관리
@@ -721,16 +840,18 @@ function selectCombo(comboId) { state2.comboId = comboId; renderAll(); }
 function selectDiscount2(v){ state2.cardDiscount=v; renderAll(); }
 
 /* =========================================
-   공통 통합 결과 렌더링
+   공통 통합 결과 렌더링 (일시불 vs 구독 총액 비교 추가)
 ========================================= */
 function renderUnifiedResult() {
   const years = document.getElementById("yearGrid");
+  const compareBar = document.getElementById("compareBar");
   const step1Arr = getStep1YearlyArr();
   
   if (st1.selectedCardIds.length > 0) {
       const comboData = getBestCombinationForSelected(st1.selectedCardIds);
       if (!comboData || !comboData.combo) {
           years.innerHTML=`<div class="yearBox total" style="grid-column:1/-1;"><b>경고</b><span>실적 초과로 혜택 산출 불가</span></div>`;
+          compareBar.innerHTML = "";
           return;
       }
   }
@@ -738,7 +859,8 @@ function renderUnifiedResult() {
   const combo = currentCombo();
   const step2Monthly = isStep2Revealed && combo ? (combo.cb + state2.cardDiscount) : 0;
   
-  let grandTotalDisc = 0;
+  let grandTotalDisc = 0; // 누적 할인액 총합
+  let totalSubPayment = 0; // 고객이 6년(72개월) 동안 실제로 내는 월 구독료 총합
   let boxes = "";
   
   for(let year=1; year<=6; year++){
@@ -747,6 +869,8 @@ function renderUnifiedResult() {
       
       if(subFee > 0) {
           const finalPayment = Math.max(0, subFee - totalDiscForThisYear);
+          totalSubPayment += (finalPayment * 12); // 실 납부액 누적
+
           boxes += `<div class="yearBox">
                       <b>${year}년차</b>
                       <div class="ori-fee">${w(subFee)}</div>
@@ -762,9 +886,13 @@ function renderUnifiedResult() {
       }
   }
 
+  // 130 상품: 72회차 캐시백 감소분 반영
   if (isStep2Revealed && combo && combo.prod.id === 'p130') {
       const diff = (combo.prod.cashback - combo.prod.lastMonthCb) * combo.units;
       grandTotalDisc -= diff;
+      if (subFee > 0) {
+         totalSubPayment += diff; 
+      }
   }
   
   let totalLabel = isStep2Revealed ? "최종 6년 누적 혜택" : "1단계 6년 누적 혜택";
@@ -773,6 +901,43 @@ function renderUnifiedResult() {
               <span>${w(grandTotalDisc)}</span>
             </div>`;
   years.innerHTML = boxes;
+
+  // ★ 총비용 비교 (일시불 vs 구독) 로직
+  let compareHtml = "";
+  if (subFee > 0 || prepayFee > 0) {
+      let totalSubCost = prepayFee + totalSubPayment;
+      
+      if (lumpSumFee > 0) {
+          let saveAmt = lumpSumFee - totalSubCost;
+          let saveText = saveAmt >= 0 
+              ? `<span style="color:#dc2626; font-weight:1000;">${w(saveAmt)} 더 저렴합니다!</span>` 
+              : `<span style="color:#2563eb; font-weight:1000;">${w(Math.abs(saveAmt))} 초과</span>`;
+          
+          compareHtml = `
+          <div style="margin-top:16px; display:flex; justify-content:space-between; align-items:center; background:linear-gradient(90deg, #fffbeb, #fef3c7); border:2px solid #facc15; padding:16px 24px; border-radius:14px; box-shadow:0 4px 12px rgba(250,204,21,0.15);">
+              <div style="font-size:16px; font-weight:900; color:#475569;">
+                  가전 일시불 구매가 <span style="text-decoration:line-through; font-size:18px; margin-left:6px;">${w(lumpSumFee)}</span>
+              </div>
+              <div style="font-size:16px; font-weight:900; color:#0f172a;">
+                  VS
+              </div>
+              <div style="font-size:18px; font-weight:900; color:#1e3a8a;">
+                  구독 총비용 (선납금+할인적용 월납) <span style="font-size:24px; color:#1d4ed8; margin-left:8px;">${w(totalSubCost)}</span>
+              </div>
+              <div style="font-size:18px; font-weight:900; display:flex; align-items:center;">
+                  <span style="background:#fff; padding:6px 16px; border-radius:10px; border:1px solid #facc15; box-shadow:0 2px 6px rgba(0,0,0,0.05);">구독 시 ${saveText}</span>
+              </div>
+          </div>`;
+      } else {
+          compareHtml = `
+          <div style="margin-top:16px; display:flex; justify-content:flex-end; align-items:center; background:#eff6ff; border:1px solid #bfdbfe; padding:12px 24px; border-radius:12px;">
+              <div style="font-size:16px; font-weight:900; color:#1e3a8a;">
+                  구독 시 6년 총비용 (선납금 + 할인적용 월납부 누적) : <span style="font-size:22px; color:#1d4ed8; margin-left:8px;">${w(totalSubCost)}</span>
+              </div>
+          </div>`;
+      }
+  }
+  compareBar.innerHTML = compareHtml;
 }
 
 function renderAll() {
