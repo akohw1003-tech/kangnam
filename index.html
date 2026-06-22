@@ -385,7 +385,6 @@
         .btn-proposal { background-color: #0056b3; }
         .btn-proposal:hover { background-color: #004494; }
         
-        /* ★ 구독 플래너 전용 버튼 스타일 추가 ★ */
         .btn-planner { background-color: #0f766e; }
         .btn-planner:hover { background-color: #0d5c56; }
         
@@ -659,7 +658,7 @@
         .print-subscription-notice { display: none; }
 
         /* =========================================================
-           🖨️ [인쇄 전용 스타일] - 화면 형태 완전 동일 출력 + 전체 출력 시 분리
+           🖨️ [인쇄 전용 스타일]
            ========================================================= */
         @media print {
             * {
@@ -667,12 +666,12 @@
                 print-color-adjust: exact !important;
             }
 
-            .print-toolbar, .paste-area-container, .tab-container, .btn-calc, .btn-clear, .btn-clear-select, #videoPanel, #qrPanel, #cardQrModalOverlay, .security-overlay, .gap-toolbar, .app-meta {
+            .print-toolbar, .paste-area-container, .tab-container, .btn-calc, .btn-clear, .btn-clear-select, #videoPanel, #qrPanel, #cardQrModalOverlay, .security-overlay, .gap-toolbar, .app-meta, #bassAirSimPanel {
                 display: none !important;
             }
 
             body { padding: 0; margin: 0; padding-bottom: 40px !important; }
-            .container { display: block !important; max-width: none; margin: 0; } /* 인쇄시 강제 표시 */
+            .container { display: block !important; max-width: none; margin: 0; } 
             .panel { box-shadow: none; border: none; padding: 0; margin-bottom: 20px; page-break-inside: avoid; }
             .left-panel, .right-column, .right-panel { position: static !important; overflow: visible !important; width: 100% !important; display: block !important; }
             .table-scroll, #quoteTableWrap { max-height: none !important; overflow: visible !important; }
@@ -843,6 +842,49 @@
             </div>
         </div>
 
+        <div id="bassAirSimPanel" style="background: #f0f7ff; border: 1px solid #cce5ff; padding: 12px 15px; border-radius: 6px; margin-bottom: 10px;">
+            <div style="font-weight: bold; color: #0056b3; font-size: 14px; margin-bottom: 8px;">
+                ✨ 바스에어(M-X0120BASV) 6월 결합 혜택 시뮬레이터 <span style="font-size:11px; color:#888;">(정상가 합산 기준)</span>
+            </div>
+            <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap; font-size: 13px;">
+                <label style="display: flex; align-items: center; gap: 5px;">
+                    <b>다품목 갯수(기존):</b>
+                    <select id="simMultiItem" style="padding: 4px; border: 1px solid #ccc; border-radius: 4px;">
+                        <option value="0">해당 없음 (0품목)</option>
+                        <option value="1">1품목 (기존 혜택 없음)</option>
+                        <option value="2">2품목 (대당 5만)</option>
+                        <option value="3">3품목 (대당 10만)</option>
+                        <option value="6">6품목 (대당 15만)</option>
+                        <option value="9">9품목 (대당 20만)</option>
+                        <option value="12">12품목 (대당 25만)</option>
+                    </select>
+                </label>
+                
+                <label style="display: flex; align-items: center; gap: 5px;">
+                    <b>구독 총액(기존):</b>
+                    <input type="text" id="simSubAmountInput" placeholder="예: 4,500,000" style="padding: 4px; border: 1px solid #ccc; border-radius: 4px; width: 120px; text-align:right;" onkeyup="this.value=fn(cleanNumber(this.value))"> 원
+                </label>
+
+                <label style="display: flex; align-items: center; gap: 5px;">
+                    <b>제휴카드 매칭(추가):</b>
+                    <select id="simCardDiscount" style="padding: 4px; border: 1px solid #ccc; border-radius: 4px;">
+                        <option value="0">적용 안함</option>
+                        <option value="17000">신한카드 (30만 실적 / -1.7만)</option>
+                        <option value="17000">국민카드 (30만 실적 / -1.7만)</option>
+                        <option value="18000">우리카드 (30만 실적 / -1.8만)</option>
+                        <option value="20000">롯데카드 (40만 실적 / -2.0만)</option>
+                    </select>
+                </label>
+
+                <button type="button" onclick="calculateBassAir()" style="background: #d32f2f; color: white; border: none; padding: 6px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.2s;">
+                    월 체감가 확인
+                </button>
+            </div>
+            
+            <div id="simResultMsg" style="margin-top: 10px; font-size: 14px; background: #fff; padding: 10px; border: 1px dashed #0056b3; border-radius: 4px; display: none;">
+            </div>
+        </div>
+
         <div class="result-toolbar">
             <button type="button" class="btn-toggle-model" id="toggleModelBtn" onclick="toggleModelRowVisibility()">모델명 숨기기</button>
         </div>
@@ -1004,7 +1046,7 @@
 
 <script>
     // =========================================================
-    // 🚨 사번 및 생년월일 데이터 (인원 현황 전체 업데이트 완료)
+    // 🚨 사번 및 생년월일 데이터
     // =========================================================
     const MANAGER_DATA = {
         "13415": { branch: "문래점", name: "정진욱", birth: "690723" },
@@ -1323,7 +1365,7 @@
     };
 
     const APP_CONFIG = {
-        version: 'v1.8', 
+        version: 'v2.0', 
         expiryDate: '2026-06-30', 
         notice: '내부전용 / 지점배포용'
     };
@@ -1751,12 +1793,6 @@
         calculateAndRender();
     }
 
-    function setParseStatus(lines) {
-        const el = document.getElementById('parseStatusText');
-        if (!el) return;
-        el.innerHTML = lines.map(v => `• ${v}`).join('<br>');
-    }
-
     function normalizeModelLine(text) {
         return String(text || '')
             .replace(/\s+/g, ' ')               
@@ -1767,7 +1803,6 @@
     function formatModelCellBlock(text) {
         if (!text) return '-';
         const lines = String(text).split(/\r?\n/);
-        
         const processed = lines.map(normalizeModelLine).filter(Boolean);
         return processed.length > 0 ? processed.join('\n') : '-';
     }
@@ -1868,14 +1903,12 @@
     }
 
     function parseExcelData() {
-        // --- 🚨 이중 보안 장치: 강제 우회 계산 차단 ---
         const savedId = sessionStorage.getItem('planner_emp_id');
         if (!savedId || typeof MANAGER_DATA === 'undefined' || !MANAGER_DATA[savedId]) {
             alert("정상적인 로그인 절차를 거치지 않았습니다. 새로고침 후 로그인해주세요.");
             location.reload();
             return;
         }
-        // ---------------------------------------------
         
         const rawText = document.getElementById("rawPasteArea").value;
         if (rawText.trim() === "") {
@@ -2194,6 +2227,8 @@
         optionLabels = [];
         document.getElementById('quoteThead').innerHTML = '';
         document.getElementById('quoteTbody').innerHTML = '';
+        document.getElementById('simSubAmountInput').value = '';
+        document.getElementById('simResultMsg').style.display = 'none';
     }
 
     const careData = {
@@ -2466,7 +2501,6 @@
         updateAppMeta();
         resetPrintModes();
         document.body.classList.add('print-estimate');
-        
         applyAutoFitZoom(); 
 
         setTimeout(() => {
@@ -2490,7 +2524,6 @@
         updateAppMeta();
         resetPrintModes();
         document.body.classList.add('print-all');
-        
         applyAutoFitZoom(); 
 
         setTimeout(() => {
@@ -2507,7 +2540,7 @@
             title: '[신한] 더구독케어', 
             phone: '080-850-0117', 
             url: 'https://www.shinhancard.com/pconts/html/card/apply/credit/1234346_2207.html?EntryLoc2=4441&btnApp=dp1',
-            benefits: '30만 ↑ 1.7만<br>70만 ↑ 2.7만<br>130만 ↑ 3.0만<br><span style="font-size:11px; color:#888;">*70만/130만 혜택은 7만원 이상 자동이체시 적용</span>'
+            benefits: '30만 ↑ 1.7만<br>70만 ↑ 2.7만<br>130만 ↑ 3.0만'
         },
         'woori_plat': { 
             title: '[우리] 플래티넘', 
@@ -2557,7 +2590,6 @@
         
         const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=0&data=${encodeURIComponent(data.url)}`;
         document.getElementById('cardQrImage').src = qrUrl;
-        
         document.getElementById('cardQrModalOverlay').style.display = 'flex';
     }
 
@@ -2608,6 +2640,97 @@
     function toggleModelRowVisibility() {
         modelRowVisible = !modelRowVisible;
         applyModelRowVisibility();
+    }
+
+    // 🌟 스마트 업셀링 기능이 탑재된 바스에어 시뮬레이터 로직
+    function calculateBassAir() {
+        const BASS_AIR_MONTHLY = 25500; // 구독 단독 및 중복 결합 5% 기본 적용 요금
+        const BASS_AIR_RECOGNIZED_AMT = 1090000; // [수정됨] 금액대 포인트 인정 금액 = 정상가 109만 원
+
+        const currentItems = parseInt(document.getElementById('simMultiItem').value);
+        const currentSubAmountStr = document.getElementById('simSubAmountInput').value;
+        const currentSubAmount = currentSubAmountStr ? cleanNumber(currentSubAmountStr) : 0;
+        const cardMonthlyDiscount = parseInt(document.getElementById('simCardDiscount').value);
+
+        // 1. 다품목 캐시백 증가 단가 테이블 매칭
+        function getCashbackAmt(items) {
+            if (items >= 12) return items * 250000;
+            if (items >= 9) return items * 200000;
+            if (items >= 6) return items * 150000;
+            if (items >= 3) return items * 100000;
+            if (items >= 2) return items * 50000;
+            return 0;
+        }
+
+        const beforeCashback = getCashbackAmt(currentItems);
+        const newItems = currentItems > 0 ? currentItems + 1 : 1; 
+        const afterCashback = getCashbackAmt(newItems);
+        const gainedCashback = afterCashback - beforeCashback;
+
+        // 2. 금액대별 더블 포인트 마일스톤 매칭 배열
+        const pointTiers = [
+            { limit: 30000000, point: 1400000 },
+            { limit: 27000000, point: 1200000 },
+            { limit: 24000000, point: 1000000 },
+            { limit: 21000000, point: 800000 },
+            { limit: 18000000, point: 700000 },
+            { limit: 15000000, point: 600000 },
+            { limit: 12000000, point: 500000 },
+            { limit: 9000000, point: 400000 },
+            { limit: 6000000, point: 300000 },
+            { limit: 3000000, point: 100000 },
+            { limit: 0, point: 0 }
+        ];
+
+        function getPointByTier(amount) {
+            for (let t of pointTiers) {
+                if (amount >= t.limit) return t.point;
+            }
+            return 0;
+        }
+
+        const beforePoint = getPointByTier(currentSubAmount);
+        const newSubAmount = currentSubAmount > 0 ? currentSubAmount + BASS_AIR_RECOGNIZED_AMT : BASS_AIR_RECOGNIZED_AMT;
+        const afterPoint = getPointByTier(newSubAmount);
+        const gainedPoint = afterPoint - beforePoint;
+
+        // 3. 🔥 스마트 업셀링 (다음 구간 도달 금액 계산)
+        let upsellingMsg = '';
+        for (let i = pointTiers.length - 2; i >= 0; i--) { // 300만 이상부터 위로 체크
+            if (newSubAmount < pointTiers[i].limit) {
+                const shortAmt = pointTiers[i].limit - newSubAmount;
+                const nextPoint = pointTiers[i].point;
+                const potentialGain = nextPoint - afterPoint;
+                
+                upsellingMsg = `
+                <div style="margin-top: 12px; padding: 12px; background: #fff8e1; border: 1px solid #ffe082; border-radius: 6px; color: #d84315; font-size: 14px; font-weight: bold; line-height: 1.5;">
+                    💡 [업셀링 제안] 현재 총 인정액은 ${fn(newSubAmount)}원입니다.<br>
+                    👉 소형가전이나 케어 등을 <span style="color:#c62828;">${fn(shortAmt)}원</span>만 더 추가하시면 ${fn(pointTiers[i].limit / 10000)}만 구간에 진입하여 <span style="text-decoration:underline;">+${fn(potentialGain)}P</span>를 추가로 받으실 수 있습니다!
+                </div>`;
+                break;
+            }
+        }
+
+        // 4. 실질 월 체감가 연산 (72개월 분할)
+        const totalBenefits = gainedCashback + gainedPoint;
+        const monthlyBenefit = Math.floor(totalBenefits / 72);
+        const realMonthlyCost = BASS_AIR_MONTHLY - monthlyBenefit - cardMonthlyDiscount;
+
+        const resultDiv = document.getElementById('simResultMsg');
+        resultDiv.style.display = 'block';
+        
+        resultDiv.innerHTML = `
+            <div style="color: #333; line-height: 1.6;">
+                ✅ <b>캐시백 혜택 증가:</b> +${fn(gainedCashback)}원 (총 ${newItems}품목 달성)<br>
+                ✅ <b>더블 포인트 증가:</b> +${fn(gainedPoint)}P (구독 인정액 ${fn(newSubAmount)}원 도달)<br>
+                ✅ <b>제휴카드 할인 반영:</b> -월 ${fn(cardMonthlyDiscount)}원
+            </div>
+            <div style="margin-top: 8px; border-top: 1px solid #ccc; padding-top: 8px; color: #d32f2f; font-size: 16px; font-weight: bold;">
+                🎉 바스에어 결합 시 실질 월 추가 부담금: <span style="text-decoration: underline;">월 ${fn(realMonthlyCost)}원!</span>
+                <span style="font-size: 12px; color: #666; font-weight: normal;">(총 혜택 세이브 총액: ${fn(totalBenefits)}원)</span>
+            </div>
+            ${upsellingMsg}
+        `;
     }
 
 </script>
