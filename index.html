@@ -842,6 +842,7 @@
             </div>
         </div>
 
+        <!-- 🌟 새롭게 변경된 테이블 통합형 바스에어 시뮬레이터 패널 -->
         <div id="bassAirSimPanel" style="background: #f0f7ff; border: 1px solid #cce5ff; padding: 12px 15px; border-radius: 6px; margin-bottom: 10px;">
             <div style="font-weight: bold; color: #0056b3; font-size: 14px; margin-bottom: 8px;">
                 ✨ 바스에어(M-X0120BASV) 6월 결합 혜택 시뮬레이터 
@@ -1365,7 +1366,7 @@
     };
 
     const APP_CONFIG = {
-        version: 'v4.0', 
+        version: 'v5.0', 
         expiryDate: '2026-06-30', 
         notice: '내부전용 / 지점배포용'
     };
@@ -2652,7 +2653,6 @@
 
         const BASS_AIR_MONTHLY = 25500; 
         const BASS_AIR_RECOGNIZED_AMT = 1090000; 
-        const BASS_AIR_NORMAL_PRICE = 1090000;
 
         const currentItems = parseInt(document.getElementById('simMultiItem').value);
         const currentSubAmountStr = document.getElementById('simSubAmountInput').value;
@@ -2701,7 +2701,7 @@
         const afterPoint = getPointByTier(newSubAmount);
         const gainedPoint = afterPoint - beforePoint;
 
-        // 3. 🚨 변경점: '가장 마지막 안' 데이터를 복제하여 새로운 '안(열)' 생성
+        // 3. '가장 마지막 안' 데이터를 완벽히 복제하여 새로운 '안(열)' 생성
         const baseIdx = optionCount - 1; // 표의 맨 마지막 인덱스
         const newIdx = optionCount; 
         
@@ -2709,38 +2709,39 @@
         const baseModel = parsedModels[baseIdx] || '-';
         parsedModels.push(baseModel + '\n바스에어(M-X0120BASV) [구독]');
 
-        // 데이터 매트릭스 복제 및 바스에어 증감액 적용
+        // 데이터 매트릭스 완벽 복제 및 바스에어 증감액 적용
         for (const key in parsedData) {
             if (parsedData.hasOwnProperty(key)) {
-                // 자동 계산되는 항목들은 복제하지 않음 (메인 로직이 동적 재계산 하도록 유도)
-                if (['결제금액', '혜택합계', '최종혜택금액', '체감구독료(월)'].includes(key)) {
-                    continue; 
-                }
-                
+                // 이전 안(baseIdx)에 있던 값을 정확히 가져옴
                 let baseVal = parsedData[key][baseIdx] !== undefined ? parsedData[key][baseIdx] : 0;
                 
-                if (key === '정상가') baseVal += BASS_AIR_NORMAL_PRICE;
-                else if (key === '정상구독료(월)') baseVal += BASS_AIR_MONTHLY;
+                // 바스에어 결합에 따른 추가/변동분 맵핑 (정상가는 구독이므로 제외)
+                if (key === '정상구독료(월)') baseVal += BASS_AIR_MONTHLY;
                 else if (key === '캐시백') baseVal += gainedCashback;
                 else if (key === '멤버십') baseVal += gainedPoint;
                 else if (key === '제휴카드(월)') baseVal += cardMonthlyDiscount;
+                else if (key === '혜택합계') baseVal += (gainedCashback + gainedPoint);
+                else if (key === '최종혜택금액') baseVal -= (gainedCashback + gainedPoint);
+                else if (key === '체감구독료(월)') baseVal += (BASS_AIR_MONTHLY - cardMonthlyDiscount);
                 
                 if (!parsedData[key]) parsedData[key] = Array(newIdx).fill(0);
                 parsedData[key][newIdx] = baseVal;
             }
         }
         
-        // 원본 엑셀에 특정 행(예: 제휴카드)이 아예 없었더라도 강제 생성
-        const essentialKeys = ['정상가', '정상구독료(월)', '캐시백', '멤버십', '제휴카드(월)'];
+        // 원본 엑셀에 필수 키 항목이 아예 누락되었을 경우를 대비한 뼈대 생성
+        const essentialKeys = ['정상구독료(월)', '캐시백', '멤버십', '제휴카드(월)', '혜택합계', '최종혜택금액', '체감구독료(월)'];
         essentialKeys.forEach(key => {
             if (!parsedData[key]) parsedData[key] = Array(newIdx).fill(0);
             if (parsedData[key][newIdx] === undefined) {
                 let baseVal = 0;
-                if (key === '정상가') baseVal = BASS_AIR_NORMAL_PRICE;
                 if (key === '정상구독료(월)') baseVal = BASS_AIR_MONTHLY;
                 if (key === '캐시백') baseVal = gainedCashback;
                 if (key === '멤버십') baseVal = gainedPoint;
                 if (key === '제휴카드(월)') baseVal = cardMonthlyDiscount;
+                if (key === '혜택합계') baseVal = gainedCashback + gainedPoint;
+                if (key === '최종혜택금액') baseVal = -(gainedCashback + gainedPoint);
+                if (key === '체감구독료(월)') baseVal = BASS_AIR_MONTHLY - cardMonthlyDiscount;
                 parsedData[key][newIdx] = baseVal;
             }
         });
