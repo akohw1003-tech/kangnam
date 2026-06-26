@@ -925,7 +925,6 @@
             </div>
         </div>
 
-        <!-- 🛠️ 설치 가이드 레이아웃 -->
         <div class="panel" id="installGuidePanel">
             <h2>🛠️ 설치 가이드</h2>
             <div class="tab-container" style="margin-bottom: 0;">
@@ -979,9 +978,10 @@
 <div class="print-subscription-notice" id="printSubscriptionNotice">
     <h4>★구독 유의사항★</h4>
     <ul>
-        <li>제휴카드 개별 발급 신청 시 발급 후 콜센터(1544-7777)로 연락해야 제휴카드 할인 혜택을 받으실 수 있습니다.</li>
-        <li>구독 계약은 상품 인도/설치 후 성립되며, 계약 성립 후 고객의 임의 해지 시 해약금이 부과됩니다.</li>
-        <li>결합상품 할인은 두 제품 이상 사용 시 적용되며, 제품의 일부해지 (명의변경, 만기 등 포함) 등으로 한 제품만 남을 경우 결합할인이 적용되지 않은 정상요금이 차월부터 청구됩니다.</li>
+        <li><b>[제휴카드 자동이체]</b> 제휴카드 할인 혜택은 <b>자동이체 등록이 완료</b>되어야 적용됩니다. 카드 발급 <b>및 계약 제품 배송 완료 후</b> LG전자 홈페이지, ThinQ 앱 또는 콜센터(1544-7777)를 통해 결제 수단을 변경해 주시기 바랍니다. (※ 카드사별 전월 실적 제외 항목을 반드시 확인해 주세요.)</li>
+        <li><b>[멤버십 포인트 차감]</b> 보유하신 멤버십 포인트로 월 구독료 차감이 가능합니다. (월 5천 원 단위, 최대 4만 원 / LGE.COM 마이페이지에서 신청) 단, <b>포인트로 구독료 전액 차감을 신청하실 경우 제휴카드 할인 혜택은 적용되지 않습니다.</b></li>
+        <li><b>[계약 및 해지]</b> 구독 계약은 상품 인도/설치 후 성립되며, 계약 성립 후 고객의 임의 해지 시 해약금이 부과됩니다.</li>
+        <li><b>[결합 할인]</b> 결합상품 할인은 두 제품 이상 사용 시 적용되며, 제품의 일부 해지(명의변경, 만기 등 포함) 등으로 한 제품만 남을 경우 결합할인이 적용되지 않은 정상 요금이 차월부터 청구됩니다.</li>
     </ul>
 </div>
 <div class="app-meta" id="appMeta"></div>
@@ -1740,6 +1740,10 @@
         if (norm.includes('캐시백') || norm.includes('캐쉬백')) return '캐시백';
         if (norm.includes('상품권')) return '상품권';
         if (norm.includes('멤버십') || norm.includes('멤버쉽') || norm.includes('포인트')) return '멤버십';
+        
+        // 추가된 로직: 특별혜택 파싱
+        if (norm.includes('특별혜택')) return '특별혜택';
+        
         if (norm.includes('최종혜택금액') || norm.includes('최종혜택가') || norm.includes('최종혜택')) return '최종혜택금액';
         if (norm.includes('혜택합계') || norm.includes('총혜택') || norm.includes('총혜택금액')) return '혜택합계';
         if (norm.includes('계약개월') || norm.includes('계약기간') || norm.includes('개월수')) return '계약개월수';
